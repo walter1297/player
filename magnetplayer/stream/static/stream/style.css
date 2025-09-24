@@ -107,6 +107,14 @@ body {
   font-size: 0.9rem;
 }
 
+.status-text {
+  transition: color 0.2s ease;
+}
+
+.status-text.error {
+  color: #fca5a5;
+}
+
 .player-card {
   display: flex;
   flex-direction: column;
@@ -120,6 +128,21 @@ body {
   border-radius: 16px;
   overflow: hidden;
   background: rgba(15, 23, 42, 0.8);
+}
+
+.player-placeholder {
+  position: absolute;
+  inset: 0;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  text-align: center;
+  color: var(--text-muted);
+  line-height: 1.5;
+  background: rgba(15, 23, 42, 0.4);
+  backdrop-filter: blur(6px);
 }
 
 .webtor-player iframe,

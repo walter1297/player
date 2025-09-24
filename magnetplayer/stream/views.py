@@ -1,8 +1,8 @@
 from __future__ import annotations
 
-from urllib.parse import quote_plus
+from urllib.parse import quote_plus, unquote_plus
 
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseRedirect
 from django.views.generic import FormView
 
 from .forms import MagnetForm
@@ -18,22 +18,23 @@ class IndexView(FormView):
         initial = super().get_initial()
         magnet = self.request.GET.get("magnet")
         if magnet:
-            initial["magnet_link"] = magnet
+            initial["magnet_link"] = unquote_plus(magnet)
         return initial
 
     def get_context_data(self, **kwargs: object) -> dict[str, object]:
         context = super().get_context_data(**kwargs)
         magnet_link = context.get("magnet_link")
         if not magnet_link:
-            magnet_link = self.request.GET.get("magnet")
+            magnet_param = self.request.GET.get("magnet")
+            magnet_link = unquote_plus(magnet_param) if magnet_param else None
         if magnet_link:
             context.update(self._build_stream_context(magnet_link))
         return context
 
     def form_valid(self, form: MagnetForm) -> HttpResponse:
         magnet_link = form.cleaned_data["magnet_link"]
-        context = self.get_context_data(form=form, magnet_link=magnet_link)
-        return self.render_to_response(context)
+        encoded = quote_plus(magnet_link)
+        return HttpResponseRedirect(f"{self.request.path}?magnet={encoded}")
 
     def form_invalid(self, form: MagnetForm) -> HttpResponse:
         return self.render_to_response(self.get_context_data(form=form))

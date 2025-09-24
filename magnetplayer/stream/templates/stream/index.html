@@ -33,7 +33,11 @@
       {% if magnet_link %}
       <section class="card player-card">
         <h2 class="section-title">在线播放</h2>
-        <div id="webtor-player" class="webtor-player" data-magnet="{{ magnet_link }}"></div>
+        <div id="webtor-player" class="webtor-player" data-magnet="{{ magnet_link }}">
+          <p class="player-placeholder">
+            正在加载 Webtor 播放器……如长时间无反应，可点击下方按钮在新窗口打开或使用客户端下载。
+          </p>
+        </div>
         <div class="actions">
           <a
             class="action-button primary"
@@ -44,9 +48,9 @@
           >
           <a class="action-button" href="{{ download_link }}">使用客户端下载</a>
         </div>
-        <p class="helper-text">
+        <p id="webtor-status" class="helper-text status-text">
           播放器由 <a href="https://webtor.io" target="_blank" rel="noopener">Webtor</a>
-          提供，支持自动选择字幕、倍速、投屏等功能。
+          提供，将在几秒内自动启动。
         </p>
       </section>
       {% endif %}
@@ -63,26 +67,78 @@
     </main>
 
     {% if magnet_link %}
-    <script src="https://cdn.jsdelivr.net/npm/webtor@0.2.26/dist/webtor.min.js"></script>
     <script>
-      document.addEventListener("DOMContentLoaded", function () {
-        if (!window.webtor) {
-          console.warn("Webtor SDK 未能加载。");
+      (function () {
+        const magnet = "{{ magnet_link|escapejs }}";
+        if (!magnet) {
           return;
         }
-        window.webtor.init({
-          el: document.getElementById("webtor-player"),
-          magnet: "{{ magnet_link|escapejs }}",
+
+        const statusEl = document.getElementById("webtor-status");
+        const placeholder = document.querySelector("#webtor-player .player-placeholder");
+        if (statusEl) {
+          statusEl.textContent = "正在加载播放器，请稍候……";
+        }
+
+        window.webtor = window.webtor || [];
+        window.webtor.push({
+          id: "webtor-player",
+          magnet: magnet,
           title: "磁力在线播放",
           lang: "zh",
           baseUrl: "https://webtor.io",
-          allowFullscreen: true,
           features: {
             continue: true,
             theme: "auto",
           },
         });
-      });
+
+        function ensureWebtorScript() {
+          const existing = document.querySelector("script[data-webtor-loader]");
+          if (existing) {
+            if (existing.dataset.webtorLoaded === "true") {
+              if (placeholder && placeholder.parentNode) {
+                placeholder.remove();
+              }
+              if (statusEl) {
+                statusEl.textContent = "播放器已加载，正在读取资源……";
+              }
+            }
+            return;
+          }
+
+          const script = document.createElement("script");
+          script.src = "https://cdn.jsdelivr.net/npm/webtor@0.2.26/dist/webtor.min.js";
+          script.async = true;
+          script.defer = true;
+          script.dataset.webtorLoader = "true";
+          script.onload = function () {
+            script.dataset.webtorLoaded = "true";
+            if (placeholder && placeholder.parentNode) {
+              placeholder.remove();
+            }
+            if (statusEl) {
+              statusEl.textContent = "播放器已加载，如仍无法播放请点击上方按钮。";
+            }
+          };
+          script.onerror = function () {
+            if (statusEl) {
+              statusEl.textContent = "播放器加载失败，请使用“在新窗口打开 Webtor”或“使用客户端下载”。";
+              statusEl.classList.add("error");
+            }
+            if (placeholder) {
+              placeholder.textContent = "播放器加载失败，请尝试使用下方按钮。";
+            }
+          };
+          document.body.appendChild(script);
+        }
+
+        if (document.readyState === "loading") {
+          document.addEventListener("DOMContentLoaded", ensureWebtorScript);
+        } else {
+          ensureWebtorScript();
+        }
+      })();
     </script>
     {% endif %}
   </body>
