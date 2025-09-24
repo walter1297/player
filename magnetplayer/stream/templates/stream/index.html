@@ -1,0 +1,89 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0"
+    />
+    <title>磁力在线播放器</title>
+    <link rel="stylesheet" href="{% static 'stream/style.css' %}" />
+  </head>
+  <body>
+    <main class="page">
+      <section class="card">
+        <h1 class="title">磁力链接在线播放 / 下载</h1>
+        <p class="subtitle">
+          将磁力链接粘贴到输入框，点击“开始播放”即可使用 Webtor 在线播放器在手机或电脑上原画质 / 音质播放或下载。
+        </p>
+        <form method="post" class="magnet-form">
+          {% csrf_token %}
+          <div class="field-group">
+            {{ form.magnet_link.errors.as_ul }}
+            {{ form.magnet_link }}
+          </div>
+          <button type="submit" class="submit-button">开始播放</button>
+        </form>
+        <p class="helper-text">
+          示例：<code>magnet:?xt=urn:btih:...</code>
+        </p>
+      </section>
+
+      {% if magnet_link %}
+      <section class="card player-card">
+        <h2 class="section-title">在线播放</h2>
+        <div id="webtor-player" class="webtor-player" data-magnet="{{ magnet_link }}"></div>
+        <div class="actions">
+          <a
+            class="action-button primary"
+            href="{{ webtor_watch_url }}"
+            target="_blank"
+            rel="noopener"
+            >在新窗口打开 Webtor</a
+          >
+          <a class="action-button" href="{{ download_link }}">使用客户端下载</a>
+        </div>
+        <p class="helper-text">
+          播放器由 <a href="https://webtor.io" target="_blank" rel="noopener">Webtor</a>
+          提供，支持自动选择字幕、倍速、投屏等功能。
+        </p>
+      </section>
+      {% endif %}
+
+      <section class="card info-card">
+        <h2 class="section-title">使用说明</h2>
+        <ul class="info-list">
+          <li>支持手机和电脑浏览器，界面自适应。</li>
+          <li>提交磁力链接后，播放器将从 P2P 网络中拉取原始媒体内容，不会降低画质和音质。</li>
+          <li>如果在线播放速度较慢，可以点击“使用客户端下载”复制磁力链接到本地 BT 客户端。</li>
+          <li>在局域网内部署时，推荐开启 HTTPS 并配置反向代理以获得更佳体验。</li>
+        </ul>
+      </section>
+    </main>
+
+    {% if magnet_link %}
+    <script src="https://cdn.jsdelivr.net/npm/webtor@0.2.26/dist/webtor.min.js"></script>
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        if (!window.webtor) {
+          console.warn("Webtor SDK 未能加载。");
+          return;
+        }
+        window.webtor.init({
+          el: document.getElementById("webtor-player"),
+          magnet: "{{ magnet_link|escapejs }}",
+          title: "磁力在线播放",
+          lang: "zh",
+          baseUrl: "https://webtor.io",
+          allowFullscreen: true,
+          features: {
+            continue: true,
+            theme: "auto",
+          },
+        });
+      });
+    </script>
+    {% endif %}
+  </body>
+</html>

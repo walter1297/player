@@ -1,0 +1,194 @@
+:root {
+  color-scheme: light dark;
+  --background: #0f172a;
+  --surface: rgba(15, 23, 42, 0.75);
+  --surface-light: rgba(255, 255, 255, 0.85);
+  --text: #e2e8f0;
+  --text-muted: #cbd5f5;
+  --accent: #22d3ee;
+  --accent-dark: #0ea5e9;
+  font-family: "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #111827, #0f172a 40%, #1f2937 100%);
+  display: flex;
+  justify-content: center;
+  padding: 2rem 1rem 4rem;
+  color: var(--text);
+}
+
+.page {
+  width: min(960px, 100%);
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.card {
+  background: var(--surface);
+  border-radius: 20px;
+  padding: 2rem;
+  box-shadow: 0 25px 45px rgba(15, 23, 42, 0.5);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.title {
+  font-size: clamp(1.6rem, 2vw + 1rem, 2.4rem);
+  margin: 0 0 0.5rem;
+}
+
+.subtitle {
+  margin: 0;
+  color: var(--text-muted);
+  line-height: 1.6;
+}
+
+.magnet-form {
+  margin-top: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.field-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.field-group ul {
+  margin: 0;
+  padding-left: 1.2rem;
+  color: #fca5a5;
+  font-size: 0.9rem;
+}
+
+.magnet-input {
+  width: 100%;
+  padding: 0.9rem 1.1rem;
+  border-radius: 12px;
+  border: none;
+  font-size: 1rem;
+  background: rgba(15, 23, 42, 0.6);
+  color: var(--text);
+  outline: 2px solid transparent;
+  transition: outline 0.2s ease, transform 0.2s ease;
+}
+
+.magnet-input:focus {
+  outline: 2px solid var(--accent);
+  transform: translateY(-1px);
+}
+
+.submit-button {
+  border: none;
+  border-radius: 12px;
+  padding: 0.9rem 1.4rem;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #0f172a;
+  background: linear-gradient(135deg, var(--accent), var(--accent-dark));
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.submit-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 30px rgba(14, 165, 233, 0.25);
+}
+
+.helper-text {
+  margin-top: 0.5rem;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+
+.player-card {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.webtor-player {
+  position: relative;
+  width: 100%;
+  padding-top: 56.25%;
+  border-radius: 16px;
+  overflow: hidden;
+  background: rgba(15, 23, 42, 0.8);
+}
+
+.webtor-player iframe,
+.webtor-player video {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.action-button {
+  padding: 0.7rem 1.2rem;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  text-decoration: none;
+  color: var(--text);
+  transition: transform 0.2s ease, background 0.2s ease;
+}
+
+.action-button:hover {
+  transform: translateY(-1px);
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.action-button.primary {
+  background: linear-gradient(135deg, var(--accent), var(--accent-dark));
+  color: #0f172a;
+  border: none;
+}
+
+.section-title {
+  margin: 0 0 1rem;
+  font-size: 1.3rem;
+}
+
+.info-card {
+  color: var(--text-muted);
+}
+
+.info-list {
+  margin: 0;
+  padding-left: 1.2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+@media (max-width: 720px) {
+  body {
+    padding: 1.5rem 1rem 3rem;
+  }
+
+  .card {
+    padding: 1.5rem;
+  }
+
+  .actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .action-button {
+    text-align: center;
+  }
+}
