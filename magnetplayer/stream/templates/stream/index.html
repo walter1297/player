@@ -1,0 +1,145 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0"
+    />
+    <title>磁力在线播放器</title>
+    <link rel="stylesheet" href="{% static 'stream/style.css' %}" />
+  </head>
+  <body>
+    <main class="page">
+      <section class="card">
+        <h1 class="title">磁力链接在线播放 / 下载</h1>
+        <p class="subtitle">
+          将磁力链接粘贴到输入框，点击“开始播放”即可使用 Webtor 在线播放器在手机或电脑上原画质 / 音质播放或下载。
+        </p>
+        <form method="post" class="magnet-form">
+          {% csrf_token %}
+          <div class="field-group">
+            {{ form.magnet_link.errors.as_ul }}
+            {{ form.magnet_link }}
+          </div>
+          <button type="submit" class="submit-button">开始播放</button>
+        </form>
+        <p class="helper-text">
+          示例：<code>magnet:?xt=urn:btih:...</code>
+        </p>
+      </section>
+
+      {% if magnet_link %}
+      <section class="card player-card">
+        <h2 class="section-title">在线播放</h2>
+        <div id="webtor-player" class="webtor-player" data-magnet="{{ magnet_link }}">
+          <p class="player-placeholder">
+            正在加载 Webtor 播放器……如长时间无反应，可点击下方按钮在新窗口打开或使用客户端下载。
+          </p>
+        </div>
+        <div class="actions">
+          <a
+            class="action-button primary"
+            href="{{ webtor_watch_url }}"
+            target="_blank"
+            rel="noopener"
+            >在新窗口打开 Webtor</a
+          >
+          <a class="action-button" href="{{ download_link }}">使用客户端下载</a>
+        </div>
+        <p id="webtor-status" class="helper-text status-text">
+          播放器由 <a href="https://webtor.io" target="_blank" rel="noopener">Webtor</a>
+          提供，将在几秒内自动启动。
+        </p>
+      </section>
+      {% endif %}
+
+      <section class="card info-card">
+        <h2 class="section-title">使用说明</h2>
+        <ul class="info-list">
+          <li>支持手机和电脑浏览器，界面自适应。</li>
+          <li>提交磁力链接后，播放器将从 P2P 网络中拉取原始媒体内容，不会降低画质和音质。</li>
+          <li>如果在线播放速度较慢，可以点击“使用客户端下载”复制磁力链接到本地 BT 客户端。</li>
+          <li>在局域网内部署时，推荐开启 HTTPS 并配置反向代理以获得更佳体验。</li>
+        </ul>
+      </section>
+    </main>
+
+    {% if magnet_link %}
+    <script>
+      (function () {
+        const magnet = "{{ magnet_link|escapejs }}";
+        if (!magnet) {
+          return;
+        }
+
+        const statusEl = document.getElementById("webtor-status");
+        const placeholder = document.querySelector("#webtor-player .player-placeholder");
+        if (statusEl) {
+          statusEl.textContent = "正在加载播放器，请稍候……";
+        }
+
+        window.webtor = window.webtor || [];
+        window.webtor.push({
+          id: "webtor-player",
+          magnet: magnet,
+          title: "磁力在线播放",
+          lang: "zh",
+          baseUrl: "https://webtor.io",
+          features: {
+            continue: true,
+            theme: "auto",
+          },
+        });
+
+        function ensureWebtorScript() {
+          const existing = document.querySelector("script[data-webtor-loader]");
+          if (existing) {
+            if (existing.dataset.webtorLoaded === "true") {
+              if (placeholder && placeholder.parentNode) {
+                placeholder.remove();
+              }
+              if (statusEl) {
+                statusEl.textContent = "播放器已加载，正在读取资源……";
+              }
+            }
+            return;
+          }
+
+          const script = document.createElement("script");
+          script.src = "https://cdn.jsdelivr.net/npm/webtor@0.2.26/dist/webtor.min.js";
+          script.async = true;
+          script.defer = true;
+          script.dataset.webtorLoader = "true";
+          script.onload = function () {
+            script.dataset.webtorLoaded = "true";
+            if (placeholder && placeholder.parentNode) {
+              placeholder.remove();
+            }
+            if (statusEl) {
+              statusEl.textContent = "播放器已加载，如仍无法播放请点击上方按钮。";
+            }
+          };
+          script.onerror = function () {
+            if (statusEl) {
+              statusEl.textContent = "播放器加载失败，请使用“在新窗口打开 Webtor”或“使用客户端下载”。";
+              statusEl.classList.add("error");
+            }
+            if (placeholder) {
+              placeholder.textContent = "播放器加载失败，请尝试使用下方按钮。";
+            }
+          };
+          document.body.appendChild(script);
+        }
+
+        if (document.readyState === "loading") {
+          document.addEventListener("DOMContentLoaded", ensureWebtorScript);
+        } else {
+          ensureWebtorScript();
+        }
+      })();
+    </script>
+    {% endif %}
+  </body>
+</html>
